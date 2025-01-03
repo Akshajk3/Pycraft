@@ -6,11 +6,23 @@ class Player(Camera):
     def __init__(self, app, position=PLAYER_POS, yaw=-90, pitch=0):
         self.app = app
         super().__init__(position=position, yaw=yaw, pitch=pitch)
+        self.sprinting = False
 
     def update(self):
         self.keyboard_control()
         self.mouse_control()
         super().update()
+
+    def handle_event(self, event):
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            voxel_handler = self.app.scene.world.voxel_handler
+            if event.button == 1:
+                voxel_handler.set_voxel()
+            if event.button == 3:
+                voxel_handler.switch_mode()
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_LCTRL:
+                self.sprinting = not self.sprinting
 
     def mouse_control(self):
         mouse_dx, mouse_dy = pygame.mouse.get_rel()
@@ -21,7 +33,11 @@ class Player(Camera):
 
     def keyboard_control(self):
         key_state = pygame.key.get_pressed()
-        vel = PLAYER_SPEED * self.app.delta_time
+
+        if self.sprinting:
+            vel = PLAYER_SPRINT_SPEED * self.app.delta_time
+        else:
+            vel = PLAYER_SPEED * self.app.delta_time
 
         if key_state[pygame.K_w]:
             self.move_forward(vel)

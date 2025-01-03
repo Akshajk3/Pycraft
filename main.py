@@ -42,7 +42,7 @@ class VoxelEngine:
         self.shader_program.update()
         self.scene.update()
 
-        # pygame.mouse.set_pos(WIN_RES.x // 2, WIN_RES.y // 2)
+        pygame.mouse.set_pos((WIN_RES.x / 2, WIN_RES.y / 2))
 
         self.delta_time = self.clock.tick()
         self.time = pygame.time.get_ticks() * 0.001
@@ -57,6 +57,7 @@ class VoxelEngine:
         for event in pygame.event.get():
             if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
                 self.is_running = False
+            self.player.handle_event(event)
 
     def run(self):
         while self.is_running:
