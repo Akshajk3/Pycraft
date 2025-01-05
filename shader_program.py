@@ -6,18 +6,25 @@ class ShaderProgram:
         self.app = app
         self.ctx : mgl.Context = app.ctx
         self.player = app.player
+
         self.chunk = self.get_program(shader_name='chunk')
         self.voxel_marker = self.get_program(shader_name='voxel_marker')
+        self.water = self.get_program(shader_name='water')
+
         self.set_uniforms_on_init()
     
     def set_uniforms_on_init(self):
         self.chunk['m_proj'].write(self.player.m_proj)
         self.chunk['m_model'].write(glm.mat4())
         self.chunk['u_texture_array_0'] = 1
+        self.chunk['bg_color'].write(BG_COLOR)
+        self.chunk['water_line'] = WATER_LINE
 
         self.voxel_marker['m_proj'].write(self.player.m_proj)
         self.voxel_marker['m_model'].write(glm.mat4(0))
         self.voxel_marker['u_texture_0'] = 0
+
+        self.water
 
 
     def update(self):
