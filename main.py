@@ -6,6 +6,7 @@ from shader_program import ShaderProgram
 from scene import Scene
 from player import Player
 from textures import Textures
+import platform
 
 class VoxelEngine:
     def __init__(self):
@@ -42,7 +43,8 @@ class VoxelEngine:
         self.shader_program.update()
         self.scene.update()
 
-        pygame.mouse.set_pos((WIN_RES.x / 2, WIN_RES.y / 2))
+        if platform.system() == "Darwin":
+            pygame.mouse.set_pos((WIN_RES.x / 2, WIN_RES.y / 2))
 
         self.delta_time = self.clock.tick()
         self.time = pygame.time.get_ticks() * 0.001

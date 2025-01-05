@@ -11,7 +11,7 @@ class CloudMesh(BaseMesh):
         self.ctx : mgl.Context = self.app.ctx
         self.program = self.app.shader_program.clouds
         self.vbo_format = '3u2'
-        self.attrs = ('in_position')
+        self.attrs = ('in_position',)
         self.vao = self.get_vao()
 
     def get_vertex_data(self):
@@ -68,3 +68,16 @@ class CloudMesh(BaseMesh):
                 for ix in range(x_count):
                     for iz in range(z_count):
                         visited.add((x + ix) + width * (z + iz))
+
+                v0 = x, y, z
+                v1 = x + x_count, y, z + z_count
+                v2 = x + x_count, y, z
+                v3 = x, y, z + z_count
+
+                for vertex in (v0, v1, v2, v3):
+                    for attr in vertex:
+                        mesh[index] = attr
+                        index += 1
+    
+        mesh = mesh[:index + 1]
+        return mesh
