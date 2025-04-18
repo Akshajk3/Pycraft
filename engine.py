@@ -26,6 +26,8 @@ class VoxelEngine:
         self.delta_time = 0
         self.time = 0
 
+        self.seed = 1337
+
         pygame.event.set_grab(True)
         pygame.mouse.set_visible(False)
 
@@ -37,6 +39,22 @@ class VoxelEngine:
         self.player = Player(self)
         self.shader_program = ShaderProgram(self)
         self.scene = Scene(self)
+        self.init_crosshair()
+
+    def init_crosshair(self):
+        crosshair_vertices = np.array([
+            -0.02, 0.0,  # left side
+             0.02, 0.0,  # right side
+             0.0, -0.02, # bottom
+             0.0,  0.02  # top
+        ], dtype='f4')
+
+        self.crosshair_vbo = self.ctx.buffer(crosshair_vertices.tobytes())
+        self.crosshair_vao = self.ctx.simple_vertex_array(
+            self.shader_program.crosshair,
+            self.crosshair_vbo,
+            'in_pos'
+        )
 
     def update(self):
         self.player.update()
@@ -53,6 +71,7 @@ class VoxelEngine:
     def render(self):
         self.ctx.clear(color=BG_COLOR)
         self.scene.render()
+        self.draw_crosshair()
         pygame.display.flip()
 
     def handle_event(self):
@@ -61,6 +80,9 @@ class VoxelEngine:
                 self.is_running = False
             self.player.handle_event(event)
 
+    def draw_crosshair(self):
+        self.crosshair_vao.render(mode=mgl.LINES)
+
     def run(self):
         while self.is_running:
             self.handle_event()
@@ -68,7 +90,3 @@ class VoxelEngine:
             self.render()
         pygame.quit()
         sys.exit()
-
-if __name__ == "__main__":
-    app = VoxelEngine()
-    app.run()

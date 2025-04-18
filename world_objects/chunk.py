@@ -13,6 +13,8 @@ class Chunk:
         self.mesh: ChunkMesh = None
         self.is_empty = True
 
+        self.seed = self.app.seed
+
         self.center = (glm.vec3(position) + 0.5) * CHUNK_SIZE
         self.is_on_frustum = self.app.player.frustum.is_on_frustum
 
@@ -35,7 +37,7 @@ class Chunk:
         voxels = np.zeros(CHUNK_VOL, dtype='uint8')
 
         cx, cy, cz = glm.ivec3(self.position) * CHUNK_SIZE
-        self.generate_terrain(voxels, cx, cy, cz)
+        self.generate_terrain(voxels, cx, cy, cz, self.seed)
 
         if np.any(voxels):
             self.is_empty = False
@@ -44,13 +46,13 @@ class Chunk:
     
     @staticmethod
     @njit
-    def generate_terrain(voxels, cx, cy, cz):
+    def generate_terrain(voxels, cx, cy, cz, seed):
         for x in range(CHUNK_SIZE):
             for z in range(CHUNK_SIZE):
                 wx = x + cx
                 wz = z + cz
-                world_height = get_height(wx, wz)
+                world_height = get_height(wx, wz, seed)
                 local_height = min(world_height - cy, CHUNK_SIZE)
                 for y in range(local_height):
                     wy = y + cy
-                    set_voxel_id(voxels, x, y, z, wx, wy, wz, world_height)
+                    set_voxel_id(voxels, x, y, z, wx, wy, wz, world_height, seed)

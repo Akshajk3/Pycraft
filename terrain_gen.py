@@ -1,9 +1,16 @@
 from noise import noise2, noise3
 from random import random
 from settings import *
+import math
 
 @njit
-def get_height(x, z):
+def pseudo_random(seed, x=0, y=0, z=0):
+    val = math.sin(seed * 12.9898 + x * 78.233 + y * 37.719 + z * 41.203)
+    return val - math.floor(val)
+
+
+@njit
+def get_height(x, z, seed):
     # island mask
     island = 1 / (pow(0.0025 * math.hypot(x - CENTER_XZ, z - CENTER_XZ), 20) + 0.0001)
     island = min(island, 1)
@@ -20,10 +27,10 @@ def get_height(x, z):
         a1 /= 1.07
 
     height = 0
-    height += noise2(x * f1, z * f1) * a1 + a1
-    height += noise2(x * f2, z * f2) * a2 - a2
-    height += noise2(x * f4, z * f4) * a4 + a4
-    height += noise2(x * f8, z * f8) * a8 - a8
+    height += noise2(x * f1, z * f1 + seed) * a1 + a1
+    height += noise2(x * f2, z * f2 + seed) * a2 - a2
+    height += noise2(x * f4, z * f4 + seed) * a4 + a4
+    height += noise2(x * f8, z * f8 + seed) * a8 - a8
 
     height = max(height, 1)
     height *= island
@@ -35,17 +42,17 @@ def get_index(x, y, z):
     return x + CHUNK_SIZE * z + CHUNK_AREA * y
 
 @njit
-def set_voxel_id(voxels, x, y, z, wx, wy, wz, world_height):
+def set_voxel_id(voxels, x, y, z, wx, wy, wz, world_height, seed):
     voxel_id = 0
 
     if wy < world_height - 1:
-        if (noise3(wx * 0.09, wy * 0.09, wz * 0.09) > 0 and
-                noise2(wx * 0.1, wz * 0.1) * 3 + 3 < wy < world_height - 10):
+        if (noise3(wx * 0.09, wy * 0.09 + seed, wz * 0.09 + seed) > 0 and
+                noise2(wx * 0.1 + seed, wz * 0.1 + seed) * 3 + 3 < wy < world_height - 10):
             voxel_id = 0
         else:
             voxel_id = GRAVEL
     else:
-        rng = int(7 * random())
+        rng = int(7 * pseudo_random(seed, wx, wy, wz))
         ry = wy - rng
         if SNOW_LVL <= ry < world_height:
             voxel_id = SNOW
@@ -61,11 +68,11 @@ def set_voxel_id(voxels, x, y, z, wx, wy, wz, world_height):
     voxels[get_index(x, y, z)] = voxel_id
 
     if wy < DIRT_LVL:
-        place_tree(voxels, x, y, z, voxel_id)
+        place_tree(voxels, x, y, z, voxel_id, seed)
 
 @njit
-def place_tree(voxels, x, y, z, voxel_id):
-    rnd = random()
+def place_tree(voxels, x, y, z, voxel_id, seed):
+    rnd = pseudo_random(seed, x, y, z)
     if voxel_id != GRASS or rnd > TREE_PROBABILITY:
         return None
     if y + TREE_HEIGHT >= CHUNK_SIZE:
@@ -81,7 +88,7 @@ def place_tree(voxels, x, y, z, voxel_id):
     m = 0
     for n, iy in enumerate(range(TREE_H_HEIGHT, TREE_HEIGHT - 1)):
         k = iy % 2
-        rng = int(random() * 2)
+        rng = int(pseudo_random(seed, x, y, z) * 2)
         for ix in range(-TREE_H_WIDTH + m, TREE_H_WIDTH - m * rng):
             for iz in range(-TREE_H_WIDTH + m * rng, TREE_H_WIDTH - m):
                 if (ix + iz) % 4:
