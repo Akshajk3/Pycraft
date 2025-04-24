@@ -16,6 +16,8 @@ class Camera:
 
         self.frustum = Frustum(self)
 
+        self.vel = glm.vec3(0, 0, 0)
+
     def update(self):
         self.update_vectors()
         self.update_view_matrix()
@@ -39,20 +41,22 @@ class Camera:
     def rotate_yaw(self, delta_x):
         self.yaw += delta_x
 
-    def move_left(self, velocity):
-        self.position -= self.right * velocity
+    def move_left(self, speed):
+        self.vel -= self.right * speed
     
-    def move_right(self, velocity):
-        self.position += self.right * velocity
+    def move_right(self, speed):
+        self.vel += self.right * speed
 
-    def move_forward(self, velocity):
-        self.position += self.forward * velocity
+    def move_forward(self, speed):
+        flat_forward = glm.normalize(glm.vec3(self.forward.x, 0, self.forward.z))
+        self.vel += flat_forward * speed
     
-    def move_back(self, velocity):
-        self.position -= self.forward * velocity
+    def move_back(self, speed):
+        flat_forward = glm.normalize(glm.vec3(self.forward.x, 0, self.forward.z))
+        self.vel -= flat_forward * speed
     
-    def move_up(self, velocity):
-        self.position.y += velocity
+    def move_up(self, speed):
+        self.position.y += speed
     
-    def move_down(self, velocity):
-        self.position.y -= velocity
+    def move_down(self, speed):
+        self.position.y -= speed
