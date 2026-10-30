@@ -2,7 +2,7 @@
 
 **A voxel engine and Minecraft-style sandbox written in Python, rendered with ModernGL and GLSL shaders.**
 
-<img width="800" height="469" alt="image" src="https://github.com/user-attachments/assets/b205bb1d-937c-410c-b10a-9094085158f8" />
+<img width="800" height="469" alt="download (1)" src="https://github.com/user-attachments/assets/fd3b5b29-be96-43b6-8962-a0925413e183" />
 
 Pycraft generates a procedurally built island of roughly **88 million blocks** (960 × 96 × 960) complete with mountains, caves, trees, water, and drifting clouds, and lets you fly around it, break blocks, and place new ones in real time.
 
